@@ -7,9 +7,9 @@ public partial class Prestito
 {
     public int IdLibro { get; set; }
 
-    public int Matricola { get; set; }
+    public int? Matricola { get; set; }
 
-    public DateTime DataPrestito { get; set; }
+    public DateTime? DataPrestito { get; set; }
 
     public DateTime? DataRestituzione { get; set; }
 

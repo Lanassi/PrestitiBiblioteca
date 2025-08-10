@@ -19,9 +19,47 @@ namespace PrestitiBiblioteca.Controllers
         }
 
         // GET: Studenti
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int pagina, string nome, string cognome, string ordina)
         {
-            return View(await _context.Studentes.ToListAsync());
+            ViewBag.Header = "Lista Degli Studenti";
+
+            var record = 50;
+            if (pagina == 0)
+                pagina = 1;
+
+            var studenti = _context.Studentes.AsQueryable();
+
+            // Ricerca per Cognome degli Studenti
+            if (!string.IsNullOrEmpty(cognome))
+            {
+                studenti = studenti.Where(st => st.Cognome.Contains(cognome));
+            }
+
+            // Filtro per Nome degli Studenti
+            if (!string.IsNullOrEmpty(nome))
+            {
+                //libri = libri.Where(l => l.Brand.BrandName.Contains(brand));
+                studenti = studenti.Where(st => st.Nome.Contains(nome));
+            }
+
+            // Ordinamento crescente o decrescente
+            ViewData["CurrentSort"] = string.IsNullOrEmpty(ordina) ? "desc" : "";
+            if (ordina == "desc")
+            {
+                studenti = studenti.OrderByDescending(st => st.Nome);
+                ordina = "";
+            }
+            else
+            {
+                studenti = studenti.OrderBy(st => st.Nome);
+                ordina = "desc";
+            }
+
+            ViewBag.TitoloLibro = cognome;
+            ViewBag.Brand = nome;
+            ViewBag.Pagine = studenti.ToList().Count / record; //numero pagine
+            ViewBag.Pagina = pagina;
+            return View(await studenti.Skip((pagina - 1) * record).Take(record).ToListAsync());            //return View(await _context.Studentes.ToListAsync());
         }
 
         // GET: Studenti/Details/5

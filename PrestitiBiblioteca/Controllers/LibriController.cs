@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using PrestitiBiblioteca.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using PrestitiBiblioteca.Models;
 
 namespace PrestitiBiblioteca.Controllers
 {
@@ -19,9 +20,47 @@ namespace PrestitiBiblioteca.Controllers
         }
 
         // GET: Libri
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int pagina, string editore, string titoloLibro, string ordina)
         {
-            return View(await _context.Libros.ToListAsync());
+            ViewBag.Header = "Lista Dei Libri";
+
+            var record = 50;
+            if (pagina == 0)
+                pagina = 1;
+
+            var libri =  _context.Libros.AsQueryable();
+
+            // Ricerca per nome del libro
+            if (!string.IsNullOrEmpty(titoloLibro))
+            {
+                libri = libri.Where(lb => lb.Titolo.Contains(titoloLibro));
+            }
+
+            // Filtro per Editore
+            if (!string.IsNullOrEmpty(editore))
+            {
+                //libri = libri.Where(l => l.Brand.BrandName.Contains(brand));
+                libri = libri.Where(lb => lb.Editore.Contains(editore));
+            }
+
+            // Ordinamento crescente o decrescente
+            ViewData["CurrentSort"] = string.IsNullOrEmpty(ordina) ? "desc" : "";
+            if (ordina == "desc")
+            {
+                libri = libri.OrderByDescending(lb => lb.Titolo);
+                ordina = "";
+            }
+            else
+            {
+                libri = libri.OrderBy(lb => lb.Titolo);
+                ordina = "desc";
+            }
+
+            ViewBag.TitoloLibro = titoloLibro;
+            ViewBag.Brand = editore;
+            ViewBag.Pagine = libri.ToList().Count / record; //numero pagine
+            ViewBag.Pagina = pagina;
+            return View(await libri.Skip((pagina - 1) * record).Take(record).ToListAsync());            //return View(await _context.Libros.ToListAsync());
         }
 
         // GET: Libri/Details/5

@@ -15,14 +15,54 @@ namespace PrestitiBiblioteca.Controllers
 
         public PrestitiController(PrestitiBibliotecaContext context)
         {
+            
             _context = context;
         }
 
         // GET: Prestiti
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int pagina, string idStudente, string idLibro, string ordina)
         {
-            var prestitiBibliotecaContext = _context.Prestitos.Include(p => p.IdLibroNavigation).Include(p => p.MatricolaNavigation);
-            return View(await prestitiBibliotecaContext.ToListAsync());
+            ViewBag.Header = "Lista Dei Prestiti";
+
+            //var prestitiBibliotecaContext = _context.Prestitos.Include(p => p.IdLibroNavigation).Include(p => p.MatricolaNavigation);
+
+
+            var record = 50;
+            if (pagina == 0)
+                pagina = 1;
+
+            var prestiti = from p in _context.Prestitos.Include(pr => pr.IdLibroNavigation).Include(pr => pr.MatricolaNavigation) select p;
+
+            // Ricerca per Libro prestato
+            if (!string.IsNullOrEmpty(idLibro))
+            {
+                prestiti = prestiti.Where(pr => pr.IdLibroNavigation.Titolo.Contains(idLibro));
+            }
+
+            // Filtro per Nome dello Student 
+            if (!string.IsNullOrEmpty(idStudente))
+            {
+                prestiti = prestiti.Where(pr => pr.MatricolaNavigation.Nome.Contains(idStudente));
+            }
+
+            // Ordinamento crescente o decrescente
+            ViewData["CurrentSort"] = string.IsNullOrEmpty(ordina) ? "desc" : "";
+            if (ordina == "desc")
+            {
+                prestiti = prestiti.OrderByDescending(st => st.MatricolaNavigation.Nome);
+                ordina = "";
+            }
+            else
+            {
+                prestiti = prestiti.OrderBy(st => st.MatricolaNavigation.Nome);
+                ordina = "desc";
+            }
+
+            ViewBag.TitoloLibro = idLibro;
+            ViewBag.Brand = idStudente;
+            ViewBag.Pagine = prestiti.ToList().Count / record; //numero pagine
+            ViewBag.Pagina = pagina;
+            return View(await prestiti.Skip((pagina - 1) * record).Take(record).ToListAsync());            //return View(await prestitiBibliotecaContext.ToListAsync());
         }
 
         // GET: Prestiti/Details/5

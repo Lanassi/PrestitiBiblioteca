@@ -2,7 +2,106 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
+
+<!-- <div class="text-center">
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div> -->
+
+<div class="container">
+    <main role="main" class="pb-3">
+
+        <div id="carouselExampleDark" class="carousel carousel-dark slide" data-bs-ride="carousel">
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="2" aria-label="Slide 3"></button>
+            </div>
+            <div class="carousel-inner">
+                <div class="carousel-item active" data-bs-interval="10000">
+                    <img src="https://tourismmedia.italia.it/is/image/mitur/Itinerari_Biblioteche%20d_Italia_0000_Hero_%20Biblioteca%20Braidense?wid=2160&hei=1320&fit=constrain,1&fmt=webp" class="d-block w-100 c-item" alt="Slide 1">
+                    <div class="carousel-caption top-0 mt-4">
+                        <p class="mt-5 fs-3 text-uppercase text-white">La biblioteca antica più bella d’Italia</p>
+                        <h1 class="display-1 fw-bolder text-capitalize text-white">Profumo di libri antichi</h1>
+                        <a href="https://www.italia.it/it/italia/cosa-fare/biblioteche-storiche-italia-5-piu-belle" class="btn btn-primary px-4 py-2 fs-5 mt-5"> Scopri </a>
+                    </div>
+                </div>
+                <div class="carousel-item" data-bs-interval="2000">
+                    <img src="https://imageapi.cambiaste.com/api/lotto/immagine/286146/2.jpg" class="d-block w-100 c-item" alt="Slide 1">
+                    <div class="carousel-caption top-0 mt-4">
+                        <p class="text-uppercase fs-3 mt-5 text-white">Raccolta di classici italiani</p>
+                        <p class="display-1 fw-bolder text-capitalize text-white">Venezia, presso Antonio Zatta e figli</p>
+                        <a href="https://www.cambiaste.com/it/asta-0820/raccolta-di-classici-italiani-delle-letteratura-parnaso-italiano-venez-286146" class="btn btn-primary px-4 py-2 fs-5 mt-5"> Scopri </a>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <img src="https://web.uniroma2.it/immagine/8587" class="d-block w-100 c-item" alt="Slide 3">
+                    <div class="carousel-caption top-0 mt-4">
+                        <p class="text-uppercase fs-3 mt-5 text-white">Centro di Gestione Sistema Bibliotecario</p>
+                        <p class="display-1 fw-bolder text-capitalize text-white">Il Sistema Bibliotecario</p>
+                        <a href="https://web.uniroma2.it/it/percorso/il_sistema_bibliotecario_di_ateneo" class="btn btn-primary px-4 py-2 fs-5 mt-5"> Scopri </a>
+                    </div>
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+        <br/>
+
+
+        <div id="print-area">
+            <div class="">
+                <div class="wysiwyg-editor" id="content_title">
+                    <h1>Centro di Gestione Sistema Bibliotecario di Ateneo</h1>
+                </div>
+                <div class="wysiwyg-editor" id="content_abstract">
+                    <p class="font-italic mb-2"></p>
+                </div>
+                <div class="wysiwyg-editor" id="content_body">
+                    <p>Il Sistema Bibliotecario d'Ateneo (SBA) è costituito dalle sei Biblioteche d'Area.</p>
+                    <p>Lo SBA opera per potenziare la qualità dei servizi a supporto, sia dell'attività scientifica e formativa dell'Ateneo, sia dei processi di valutazione della ricerca e della didattica in base al regolamento vigente.</p>
+                    <p>Istituito con DR n. 86 del 14/01/2013 è richiamato al TITOLO IV, tra le Strutture Amministrative Centrali dell'Ateneo (art. 20) ed è configurato come un unico centro di servizio amministrativo alle dipendenze dell'Amministrazione Centrale, i cui organi sono:</p>
+                    <ul>
+                        <li>Comitato Tecnico-Scientifico</li>
+                        <li>Il Direttore</li>
+                    </ul>
+                    <p>Il Comitato Tecnico-Scientifico è composto dai Presidenti dei Consigli Scientifici e dai Responsabili delle singole Biblioteche d'Area.<br>Ne fanno attualmente parte (DR n. 2954 del 17/09/2013) come Presidente:</p>
+                    <ul>
+                        <li>Prof.&nbsp;Claudio Macci - Area Scientifico Tecnologica</li>
+                        <li>Prof.ssa Daniela Patrizia Taormina - Area Letteraria Storica Filosofica</li>
+                        <li>Prof.ssa Francesca Pica - Area Biomedica</li>
+                        <li>Prof.ssa Laura Menini - Area di Ingegneria</li>
+                        <li>Prof. Mario Stella Richter - Area di Giurisprudenza</li>
+                        <li>Prof. Francesco Ranalli - Area Economica</li>
+                    </ul>
+                    <p>Come Responsabile:</p>
+                    <ul>
+                        <li>Dott.ssa Paola Coppola - Area Economica</li>
+                        <li>Dott. Stefano Valente - Area Scientifico Tecnologica</li>
+                        <li>Dott.ssa Maria Carmela Violante - Area Letteraria Storica Filosofica</li>
+                        <li>Dott. Gabriele Mazzitelli - Area Biomedica</li>
+                        <li>Dott.ssa Daniela Picin&nbsp;- Area di Ingegneria</li>
+                        <li>Dott.ssa Paola Vinattieri - Area Giuridica</li>
+                    </ul>
+                    <p>Direttore del Comitato Tecnico Scientifico è il Prof.ssa Daniela Patrizia Taormina<br><br>Coordinatore amministrativo è la dott.ssa Laura Fabbri <br>tel. +39 06 7259.2662 email: <a href="mailto:laura.fabbri@uniroma2.it">laura.fabbri@uniroma2.it</a></p>
+                    <p>&nbsp;</p>
+                </div>
+            </div>
+        </div>
+
+
+
+
+    </main>
 </div>
+
+
+
+
+
