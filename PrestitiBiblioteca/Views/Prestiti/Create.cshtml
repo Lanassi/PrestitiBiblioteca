@@ -1,0 +1,46 @@
+﻿@model PrestitiBiblioteca.Models.Prestito
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>Prestito</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="IdLibro" class="control-label"></label>
+                <select asp-for="IdLibro" class ="form-control" asp-items="ViewBag.IdLibro"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="Matricola" class="control-label"></label>
+                <select asp-for="Matricola" class ="form-control" asp-items="ViewBag.Matricola"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="DataPrestito" class="control-label"></label>
+                <input asp-for="DataPrestito" class="form-control" />
+                <span asp-validation-for="DataPrestito" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DataRestituzione" class="control-label"></label>
+                <input asp-for="DataRestituzione" class="form-control" />
+                <span asp-validation-for="DataRestituzione" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
