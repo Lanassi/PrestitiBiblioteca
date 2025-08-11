@@ -23,7 +23,7 @@ namespace PrestitiBiblioteca.Controllers
         {
             ViewBag.Header = "Lista Degli Studenti";
 
-            var record = 50;
+            var record = 10;
             if (pagina == 0)
                 pagina = 1;
 
