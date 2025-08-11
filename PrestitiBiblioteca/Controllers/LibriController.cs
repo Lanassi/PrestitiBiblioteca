@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using PrestitiBiblioteca.Models;
 using System;
 using System.Collections.Generic;
@@ -13,10 +14,13 @@ namespace PrestitiBiblioteca.Controllers
     public class LibriController : Controller
     {
         private readonly PrestitiBibliotecaContext _context;
+        private readonly ILogger<LibriController> _logger;
 
-        public LibriController(PrestitiBibliotecaContext context)
+        // Costruttore principale
+        public LibriController(PrestitiBibliotecaContext context, ILogger<LibriController> logger)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         // GET: Libri
@@ -28,39 +32,51 @@ namespace PrestitiBiblioteca.Controllers
             if (pagina == 0)
                 pagina = 1;
 
-            var libri =  _context.Libros.AsQueryable();
-
-            // Ricerca per nome del libro
-            if (!string.IsNullOrEmpty(titoloLibro))
+            try
             {
-                libri = libri.Where(lb => lb.Titolo.Contains(titoloLibro));
-            }
+                _logger.LogInformation("Richiesta della lista dei Libri");
 
-            // Filtro per Editore
-            if (!string.IsNullOrEmpty(editore))
-            {
-                //libri = libri.Where(l => l.Brand.BrandName.Contains(brand));
-                libri = libri.Where(lb => lb.Editore.Contains(editore));
-            }
+                var libri = _context.Libros.AsQueryable();
 
-            // Ordinamento crescente o decrescente
-            ViewData["CurrentSort"] = string.IsNullOrEmpty(ordina) ? "desc" : "";
-            if (ordina == "desc")
-            {
-                libri = libri.OrderByDescending(lb => lb.Titolo);
-                ordina = "";
-            }
-            else
-            {
-                libri = libri.OrderBy(lb => lb.Titolo);
-                ordina = "desc";
-            }
+                // Ricerca per nome del libro
+                if (!string.IsNullOrEmpty(titoloLibro))
+                {
+                    libri = libri.Where(lb => lb.Titolo.Contains(titoloLibro));
+                }
 
-            ViewBag.TitoloLibro = titoloLibro;
-            ViewBag.Brand = editore;
-            ViewBag.Pagine = libri.ToList().Count / record; //numero pagine
-            ViewBag.Pagina = pagina;
-            return View(await libri.Skip((pagina - 1) * record).Take(record).ToListAsync());            //return View(await _context.Libros.ToListAsync());
+                // Filtro per Editore
+                if (!string.IsNullOrEmpty(editore))
+                {
+                    //libri = libri.Where(l => l.Brand.BrandName.Contains(brand));
+                    libri = libri.Where(lb => lb.Editore.Contains(editore));
+                }
+
+                // Ordinamento crescente o decrescente
+                ViewData["CurrentSort"] = string.IsNullOrEmpty(ordina) ? "desc" : "";
+                if (ordina == "desc")
+                {
+                    libri = libri.OrderByDescending(lb => lb.Titolo);
+                    ordina = "";
+                }
+                else
+                {
+                    libri = libri.OrderBy(lb => lb.Titolo);
+                    ordina = "desc";
+                }
+
+                ViewBag.TitoloLibro = titoloLibro;
+                ViewBag.Brand = editore;
+                ViewBag.Pagine = libri.ToList().Count / record; //numero pagine
+                ViewBag.Pagina = pagina;
+                return View(await libri.Skip((pagina - 1) * record).Take(record).ToListAsync());            //return View(await _context.Libros.ToListAsync());
+            }
+            catch (SqlException ex)
+            {
+                _logger.LogError(ex, "Errore durante il recupero dei libri");
+                ModelState.AddModelError(string.Empty, "Si è verificato un errore durante il recupero dei libri. Riprova più tardi.");
+                return View(new List<Libro>());
+
+            }
         }
 
         // GET: Libri/Details/5
