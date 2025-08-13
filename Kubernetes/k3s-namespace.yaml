@@ -1,0 +1,9 @@
+# Definisce un namespace dedicato per l'applicazione
+# Isola le risorse e facilita la gestione
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: prestiti-biblioteca
+  labels:
+    name: prestiti-biblioteca
+    environment: production

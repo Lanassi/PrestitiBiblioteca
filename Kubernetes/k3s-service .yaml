@@ -1,0 +1,121 @@
+# === Service per esporre l'applicazione ===
+apiVersion: v1
+kind: Service
+metadata:
+  name: prestiti-biblioteca
+  namespace: prestiti-biblioteca
+  labels:
+    app: prestiti-biblioteca
+spec:
+  selector:
+    app: prestiti-biblioteca
+  ports:
+    - protocol: TCP
+      port: 80          # Porta esposta dal service
+      targetPort: 8080  # Porta del container
+      name: http
+  type: ClusterIP       # Cambia a LoadBalancer se hai un cloud provider
+
+---
+# === Ingress per routing esterno (opzionale) ===
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: prestiti-biblioteca-ingress
+  namespace: prestiti-biblioteca
+  annotations:
+    # Configurazioni per NGINX Ingress Controller
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    # Configurazioni per certificati SSL automatici (cert-manager)
+    # cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  rules:
+  - host: prestiti-biblioteca.local  # Cambia con il tuo dominio
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: prestiti-biblioteca
+            port:
+              number: 80
+  # Configurazione TLS (HTTPS)
+  # tls:
+  # - hosts:
+  #   - prestiti-biblioteca.yourdomain.com
+  #   secretName: prestiti-biblioteca-tls
+
+---
+# === HorizontalPodAutoscaler per scaling automatico ===
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: prestiti-biblioteca-hpa
+  namespace: prestiti-biblioteca
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: prestiti-biblioteca
+  minReplicas: 2      # Minimo 2 pod
+  maxReplicas: 10     # Massimo 10 pod
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70  # Scale quando CPU > 70%
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80  # Scale quando memoria > 80%
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300  # Attende 5 min prima di ridurre
+    scaleUp:
+      stabilizationWindowSeconds: 60   # Attende 1 min prima di aumentare
+
+---
+# === NetworkPolicy per sicurezza (opzionale) ===
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: prestiti-biblioteca-netpol
+  namespace: prestiti-biblioteca
+spec:
+  podSelector:
+    matchLabels:
+      app: prestiti-biblioteca
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector: {}  # Consenti traffico da tutti i namespace
+    ports:
+    - protocol: TCP
+      port: 8080
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: mssql      # Consenti connessioni al database
+    ports:
+    - protocol: TCP
+      port: 1433
+  - to: {}              # Consenti tutto il traffico in uscita per ora
+    ports:
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80
