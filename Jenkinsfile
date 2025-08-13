@@ -36,7 +36,7 @@ pipeline {
                             git(
                                 url: "${JINKINS_DOCKER_FILE}",
                                 branch: "${BRANCH}",
-                                credentialsId: "github"
+                                credentialsId: "github-token"
                             )
                             echo " Fine clonazione del Jenkinsfile."
                         }
@@ -69,7 +69,7 @@ pipeline {
             }
         }
     }
-    // token:   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
+    // token:   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
          
     // Blocchi post (esecuzione dopo il build):
     post {
