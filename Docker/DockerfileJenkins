@@ -37,3 +37,4 @@ RUN jenkins-plugin-cli --plugins \
     credentials:latest \
     git:latest \
     workflow-aggregator:latest
+    

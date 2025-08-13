@@ -7,3 +7,4 @@ metadata:
   labels:
     name: prestiti-biblioteca
     environment: production
+    
