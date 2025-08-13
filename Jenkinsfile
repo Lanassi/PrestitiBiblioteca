@@ -10,17 +10,17 @@ pipeline {
     }
     
     environment {
-        JINKINS_DOCKER_FILE = 'https://github.com/Lanassi/ProgettoSpindox.git'
-        CODE_REPO = 'https://github.com/Lanassi/MyProgetto1.git'  // URL del repository del codice .NET
+        JINKINS_DOCKER_FILE = 'https://github.com/Lanassi/CI-CD-PrestitiBiblioteca.git'
+        CODE_REPO = 'https://github.com/Lanassi/PrestitiBiblioteca.git'  // URL del repository del codice .NET
         BRANCH = 'main'  // Branch da buildare
 
         //DOCKER_HOST = "unix:///Users/lansanacamara/.colima/default/docker.sock"
-        DOCKER_IMAGE = "itslansana/progettospindox"
+        DOCKER_IMAGE = "itslansana/CI-CD-PrestitiBiblioteca"
         DOCKER_TAG = "${env.BUILD_NUMBER ?: 'latest'}"
 
-        DOTNET_ROOT = "/opt/homebrew/bin/dotnet"
+    //    DOTNET_ROOT = "/opt/homebrew/bin/dotnet"
         //PATH = "/opt/homebrew/bin:${env.PATH}"
-        PATH = "/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin:${env.PATH}"
+    //    PATH = "/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin:${env.PATH}"
         
     }
     
@@ -29,10 +29,10 @@ pipeline {
         // Clona il repository contenente il Jenkinsfile (e presumibilmente il Dockerfile)
         stage('Clonazione Repository Jenkinsfile') {
             steps {
-                dir("MyProgetto1") {
+                dir("CI-CD-PrestitiBiblioteca") {
                     script {
                         echo "Clonazione del repository Jenkinsfile..."
-                        dir("MyProgetto1") {
+                        dir("CI-CD-PrestitiBiblioteca") {
                             git(
                                 url: "${JINKINS_DOCKER_FILE}",
                                 branch: "${BRANCH}",
@@ -48,7 +48,7 @@ pipeline {
         // Clona il repository del progetto .NET da buildare
         stage('Checkout del Codice Sorgente') {
             steps {
-                dir("MyProgetto1") {
+                dir("PrestitiBiblioteca") {
                     script {
                         echo "Clonazione del repository del codice sorgente .NET..."
                         git(
