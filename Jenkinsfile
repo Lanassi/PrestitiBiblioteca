@@ -1,7 +1,8 @@
-pipeline { 
+
+vpipeline { 
     agent any
 
-    // Variabili di ambiente globali
+   // Variabili di ambiente globali
     environment {
 
         JINKINS_DOCKER_FILE = 'https://github.com/Lanassi/CI-CD-PrestitiBiblioteca.git'
@@ -29,177 +30,188 @@ pipeline {
     }
     
     stages {
-        
-        // Clona il repository contenente il Jenkinsfile (e presumibilmente il Dockerfile)
-        stage('Clonazione Repository Jenkinsfile') {
+        echo "Iniza tutto!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+        // Clona il repository contenente il Jenkinsfile e Dockerfile
+        stage('Clonazione Repository CI/CD') {
             steps {
-                dir("CI-CD-PrestitiBiblioteca") {
-                    script {
-                        echo "Clonazione del repository Jenkinsfile..."
-                        dir("CI-CD-PrestitiBiblioteca") {
-                            git(
-                                url: "${JINKINS_DOCKER_FILE}",
-                                branch: "${BRANCH}",
-                                credentialsId: "github-token"
-                            )
-                            echo " Fine clonazione del Jenkinsfile."
-                        }
+                script {
+                    echo "Clonazione del repository CI/CD..."
+                    dir("ci-cd-PrestitiBiblioteca") {
+                        git(
+                            url: "${JINKINS_DOCKER_FILE}",
+                            branch: "${BRANCH}",
+                            credentialsId: "github-token"
+                        )
                     }
+                    echo "Fine clonazione del repository CI/CD."
                 }
             }
         }
+
+
         
         // Clona il repository del progetto .NET da buildare
         stage('📥 Checkout del Codice Sorgente') {
             steps {
-                dir("PrestitiBiblioteca") {
-                    script {
-                        echo "Clonazione del repository del codice sorgente .NET..."
+                script {
+                    echo "Clonazione del repository del codice sorgente .NET..."
+                    dir("ci-cd-PrestitiBiblioteca") {
                         git(
                             url: "${CODE_REPO}",
                             branch: "${BRANCH}",
-                            credentialsId: "github"
+                            credentialsId: "github-token"
                         )
-                        echo "Fine clonazione del codice sorgente .NET..."
                     }
+                    echo "Fine clonazione del codice sorgente .NET..."
                 }
             }
         }
 
-
-        // Ripristina le dipendenze del progetto .NET usando `dotnet restore`
-        /*stage('Restore delle Dipendenze') {
-            steps {
-                dir("MyProgetto1") {
-                    echo "Inizio Restore Dependencies"
-                    script {
-                        try {
-                            sh 'export PATH=${DOTNET_ROOT}:$PATH && ${DOTNET_ROOT} restore'
-                        } catch (Exception e) {
-                            error "Errore nel restore delle dipendenze: ${e.message}"
-                        }
-                    }
-                    echo "Fine Restore Dependencies"
-                }
-            }
-        }*/
-        
-        
         stage('Debug Environment') {
-          steps {
-            sh '''
-              echo "Shell: $SHELL"
-              echo "PATH: $PATH"
-              which sh
-              which bash
-            '''
-          }
-        }
-
-        /*stage('📥 Checkout') {
             steps {
-                echo '=== Checkout del codice dal repository ==='
-                // Jenkins fa automaticamente il checkout se il Jenkinsfile è nel repo
-                checkout scm
-                
-                // Mostra informazioni sul commit corrente
                 sh '''
-                    echo "Commit corrente: $(git rev-parse HEAD)"
-                    echo "Branch: $(git branch --show-current)"
-                    echo "Ultimo commit: $(git log -1 --pretty=format:'%h - %s (%an, %ar)')"
+                    echo "Shell: $SHELL"
+                    echo "PATH: $PATH"
+                    echo "Working Directory: $(pwd)"
+                    ls -la
+                    which dotnet || echo "dotnet non trovato nel PATH"
                 '''
             }
-        }*/
+        }
         
+        echo "Finisce tutto!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
         stage('🔧 Restore Dependencies') {
             steps {
                 echo '=== Ripristino delle dipendenze NuGet ==='
-                sh '''
-                    # Ripristina tutti i pacchetti NuGet necessari
-                    dotnet restore --verbosity normal
-                    
-                    # Mostra informazioni sul progetto
-                    dotnet --version
-                    echo "Progetto: $(find . -name '*.csproj' | head -1)"
-                '''
+                dir("dotnet-project") {
+                    sh '''
+                        # Verifica la presenza di dotnet
+                        dotnet --version
+                        
+                        # Mostra i file del progetto
+                        find . -name "*.csproj" -o -name "*.sln"
+                        
+                        # Ripristina tutti i pacchetti NuGet necessari
+                        dotnet restore --verbosity normal
+                    '''
+                }
             }
         }
-        
+        echo "Finisce tutto!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
         stage('🏗️ Build') {
             steps {
                 echo '=== Compilazione del progetto ==='
-                sh '''
-                    # Compila il progetto in modalità Release
-                    dotnet build --configuration Release --no-restore --verbosity normal
-                    
-                    # Verifica che la build sia riuscita
-                    if [ $? -eq 0 ]; then
-                        echo "✅ Build completata con successo"
-                    else
-                        echo "❌ Build fallita"
-                        exit 1
-                    fi
-                '''
+                dir("dotnet-project") {
+                    sh '''
+                        # Compila il progetto in modalità Release
+                        dotnet build --configuration Release --no-restore --verbosity normal
+                        
+                        # Verifica che la build sia riuscita
+                        if [ $? -eq 0 ]; then
+                            echo "✅ Build completata con successo"
+                        else
+                            echo "❌ Build fallita"
+                            exit 1
+                        fi
+                    '''
+                }
             }
         }
         
         stage('🧪 Test') {
             steps {
                 echo '=== Esecuzione dei test ==='
-                sh '''
-                    # Esegue tutti i test del progetto
-                    dotnet test --configuration Release --no-build --verbosity normal --logger trx --results-directory ./TestResults/
-                    
-                    # Verifica se esistono file di test
-                    if find . -name "*Test*.csproj" -o -name "*Tests*.csproj" | grep -q .; then
-                        echo "✅ Test trovati ed eseguiti"
-                    else
-                        echo "⚠️ Nessun progetto di test trovato, saltando i test"
-                    fi
-                '''
+                dir("dotnet-project") {
+                    sh '''
+                        # Verifica se esistono file di test
+                        if find . -name "*Test*.csproj" -o -name "*Tests*.csproj" | grep -q .; then
+                            echo "✅ Test trovati, esecuzione in corso..."
+                            # Esegue tutti i test del progetto
+                            dotnet test --configuration Release --no-build --verbosity normal --logger trx --results-directory ./TestResults/
+                        else
+                            echo "⚠️ Nessun progetto di test trovato, saltando i test"
+                        fi
+                    '''
+                }
             }
             post {
                 always {
                     // Pubblica i risultati dei test se esistono
                     script {
-                        if (fileExists('TestResults/*.trx')) {
-                            publishTestResults testResultsPattern: 'TestResults/*.trx'
+                        if (fileExists('dotnet-project/TestResults/*.trx')) {
+                            publishTestResults testResultsPattern: 'dotnet-project/TestResults/*.trx'
                         }
                     }
                 }
             }
         }
 
-        // Pubblica l’output della build in una directory per il packaging
-        stage('Publish') {
+        // Pubblica l'output della build
+        stage('📦 Publish') {
             steps {
-                echo "Inizio Publish"
-                
-                sh "dotnet publish -c Release -f net9.0 -o publish"
-                
-                echo "Fine Publish"
+                echo "=== Pubblicazione dell'applicazione ==="
+                dir("dotnet-project") {
+                    sh '''
+                        # Trova il file di progetto principale
+                        PROJECT_FILE=$(find . -name "*.csproj" | head -1)
+                        echo "Pubblicazione progetto: $PROJECT_FILE"
+                        
+                        # Pubblica l'applicazione
+                        dotnet publish "$PROJECT_FILE" -c Release -f net9.0 -o ../publish
+                        
+                        # Verifica i file pubblicati
+                        ls -la ../publish/
+                    '''
+                }
             }
         }
 
-        // Verifica che Docker sia attivo e funzionante eseguendo `docker ps`
-        stage('Verifica Docker') {
+        // Verifica Docker
+        stage('🐳 Verifica Docker') {
             steps {
-                echo "Inizio Test Docker!"
-                //sh 'docker -H unix:///Users/lansanacamara/.colima/default/docker.sock ps'
-                sh 'docker ps'
-                echo "Fine Test Docker!"
+                echo "=== Verifica Docker ==="
+                sh '''
+                    docker --version
+                    docker ps
+                    echo "✅ Docker funzionante"
+                '''
             }
         }
-
-
-        // Pulisce l’intero workspace Jenkins alla fine della pipeline
-        stage('Cleanup') {
+        
+        // Costruzione immagine Docker (opzionale)
+        stage('🔨 Build Docker Image') {
+            when {
+                // Esegui solo se esiste un Dockerfile
+                expression {
+                    return fileExists('ci-cd-files/Dockerfile') || fileExists('dotnet-project/Dockerfile')
+                }
+            }
             steps {
-                cleanWs()
+                script {
+                    echo "=== Costruzione immagine Docker ==="
+                    def dockerfilePath = fileExists('ci-cd-files/Dockerfile') ? 'ci-cd-files/Dockerfile' : 'dotnet-project/Dockerfile'
+                    
+                    sh """
+                        # Copia i file pubblicati se necessario
+                        if [ -f "ci-cd-files/Dockerfile" ]; then
+                            cp -r publish ci-cd-files/
+                            cd ci-cd-files
+                        else
+                            cd dotnet-project
+                        fi
+                        
+                        # Costruisci l'immagine
+                        docker build -t prestiti-biblioteca:latest .
+                        docker images | grep prestiti-biblioteca
+                    """
+                }
             }
         }
+    
+        
     }
-    // token:   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
+    
+
          
     // Blocchi post (esecuzione dopo il build):
     post {
