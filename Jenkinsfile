@@ -69,7 +69,8 @@ pipeline {
             }
         }
     }
-
+    // token:   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
+         
     // Blocchi post (esecuzione dopo il build):
     post {
         always {
