@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  jenkins:
+    build: .  # Usa il Dockerfile sopra
+    ports:
+      - "8080:8080"   # Porta web Jenkins
+      - "50000:50000" # Porta per agenti Jenkins
+    volumes:
+      - jenkins_home:/var/jenkins_home          # Persiste dati Jenkins
+      - /var/run/docker.sock:/var/run/docker.sock # Socket Docker per DinD (Docker in Docker)
+    environment:
+      - JAVA_OPTS=-Djenkins.install.runSetupWizard=false  # Salta wizard iniziale
+    networks:
+      - jenkins-network
+    restart: unless-stopped
+
+volumes:
+  jenkins_home:
+    driver: local
+
+networks:
+  jenkins-network:
+    driver: bridge
+
+    
